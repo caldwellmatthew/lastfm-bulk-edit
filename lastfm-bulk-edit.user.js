@@ -393,7 +393,7 @@ function prompt(title, body) {
             }
         });
 
-        form.addEventListener('reset', modal.hide);
+        form.addEventListener('reset', () => modal.hide());
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             resolve(new FormData(form));
@@ -426,13 +426,19 @@ function createModal(title, body, options) {
     if (options && options.dismissible) {
         // create X button that closes the modal
         const closeButton = document.createElement('button');
-        closeButton.className = 'modal-dismiss';
+        closeButton.className = 'modal-dismiss sr-only';
         closeButton.textContent = 'Close';
-        closeButton.addEventListener('click', hide);
+        closeButton.addEventListener('click', () => hide());
+
+        // create modal actions div
+        const modalActions = document.createElement('div');
+        modalActions.className = 'modal-actions';
+        modalActions.appendChild(closeButton);
+
 
         // append X button to DOM
         const modalContent = fragment.querySelector('.modal-content');
-        modalContent.insertBefore(closeButton, modalContent.firstElementChild);
+        modalContent.insertBefore(modalActions, modalContent.firstElementChild);
 
         // close modal when user clicks outside modal
         const popupWrapper = fragment.querySelector('.popup_wrapper');
@@ -539,7 +545,7 @@ async function fetchScrobbleData(url, loadingModal, parentStep, thisPageOnly = f
     let scrobbleData = await forEachParallel(loadingModal, parentStep, documentsToFetch, async (documentToFetch, step) => {
         const fetchedDocument = await documentToFetch;
 
-        const table = fetchedDocument.querySelector('table.chartlist');
+        const table = fetchedDocument.querySelector('table.chartlist:not(.chartlist__placeholder)');
         if (!table) {
             // sometimes a missing chartlist is expected, other times it indicates a failure
             if (fetchedDocument.body.textContent.includes('There was a problem loading your')) {
